@@ -7,7 +7,7 @@ import com.example.demo.model.User;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
-    boolean existsByEmail(String email);   // ✅ Correct method name
+    boolean existsByEmail(String email); 
     Optional<User> findByEmail(String email);
 }
 

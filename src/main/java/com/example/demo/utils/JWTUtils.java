@@ -13,8 +13,6 @@ import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 
-import java.util.Base64;
-
 @Service
 public class JWTUtils {
 
@@ -23,19 +21,25 @@ public class JWTUtils {
     private final SecretKey key;
 
     public JWTUtils() {
-        String secString = "S3cr3tK3yF0rMuskan1234567890ABCDEF==";
+        String secString = "LIPwZKgKEkWub7dtWGRIdPHKc8cV1d+xuBdC7+gs2gM=";
         byte[] keyBytes = Base64.getDecoder().decode(secString.getBytes(StandardCharsets.UTF_8));
         this.key = new SecretKeySpec(keyBytes, "HmacSHA256");
     }
 
     public String generateToken(UserDetails userDetails) {
-        return Jwts.builder()
-            .setSubject(userDetails.getUsername())
-            .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-            .signWith(key)
-            .compact();
-    }
+    Map<String, Object> claims = new HashMap<>();
+    claims.put("authorities", userDetails.getAuthorities().stream()
+        .map(grantedAuthority -> grantedAuthority.getAuthority())
+        .toList());
+
+    return Jwts.builder()
+        .setClaims(claims)
+        .setSubject(userDetails.getUsername())
+        .setIssuedAt(new Date(System.currentTimeMillis()))
+        .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+        .signWith(key)
+        .compact();
+}
 
     public String extractUsername(String token) {
         return extractClaims(token, Claims::getSubject);
